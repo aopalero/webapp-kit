@@ -1,7 +1,7 @@
 <template>
-  <aside class="fixed inset-y-0 left-0 z-20 flex h-screen w-60 flex-col bg-background">
+  <aside class="flex h-full w-full flex-col bg-background overflow-hidden">
     <!-- Header -->
-    <div class="flex h-14 items-center gap-2 px-4">
+    <div class="flex h-14 items-center gap-2 px-4 border-b">
       <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
         <span class="text-sm font-semibold text-primary">W</span>
       </div>
@@ -32,28 +32,32 @@
         </div>
       </div>
     </nav>
-    
-    <!-- User Profile -->
-    <div class="border-t px-2 py-3">
-      <div class="flex items-center gap-3 rounded-md p-2">
-        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-          <UserIcon class="h-4 w-4 text-primary" />
-        </div>
-        <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-medium">Admin User</p>
-          <p class="truncate text-xs text-muted-foreground">admin@example.com</p>
-        </div>
-      </div>
-    </div>
   </aside>
 </template>
 
+<style scoped>
+aside {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+</style>
+
 <script setup>
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { 
   LayoutDashboard,
-  Users,
-  User as UserIcon
+  Users
 } from 'lucide-vue-next'
 
 const route = useRoute()

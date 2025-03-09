@@ -1,9 +1,13 @@
 <template>
-  <header class="sticky top-0 z-40 border-b bg-background">
+  <header class="sticky top-0 z-40 border-b bg-background w-full">
     <div class="flex h-14 items-center justify-between px-4">
       <!-- Left Section -->
       <div class="flex items-center gap-4">
-        <button class="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent" @click="$emit('toggle-sidebar')">
+        <button 
+          class="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent" 
+          @click="toggleSidebar"
+          aria-label="Toggle sidebar"
+        >
           <Menu class="h-5 w-5" />
           <span class="sr-only">Toggle sidebar</span>
         </button>
@@ -28,6 +32,7 @@
         <button 
           class="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent"
           @click="isNotificationsOpen = !isNotificationsOpen"
+          aria-label="Toggle notifications"
         >
           <Bell class="h-5 w-5" />
           <span class="absolute h-2 w-2 rounded-full bg-primary translate-x-2 -translate-y-2"></span>
@@ -36,6 +41,7 @@
         <button 
           class="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent"
           @click="toggleTheme"
+          aria-label="Toggle theme"
         >
           <Sun v-if="theme === 'dark'" class="h-5 w-5" />
           <Moon v-else class="h-5 w-5" />
@@ -44,6 +50,7 @@
         <button 
           class="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent overflow-hidden"
           @click="isUserMenuOpen = !isUserMenuOpen"
+          aria-label="User menu"
         >
           <img
             src="https://avatars.githubusercontent.com/u/1?v=4"
@@ -55,20 +62,39 @@
         <!-- User Menu Dropdown -->
         <div 
           v-if="isUserMenuOpen" 
-          class="absolute right-2 top-[3.5rem] w-56 rounded-lg border bg-popover p-1.5 text-popover-foreground shadow-md"
+          class="user-menu-dropdown absolute right-2 top-[3.5rem] w-56 rounded-lg border bg-popover p-1.5 text-popover-foreground shadow-md z-50"
         >
-          <div class="px-2 py-1.5 text-sm font-semibold">My Account</div>
+          <div class="flex items-center gap-3 px-2 py-3">
+            <img
+              src="https://avatars.githubusercontent.com/u/1?v=4"
+              alt="User avatar"
+              class="h-10 w-10 rounded-full"
+            />
+            <div class="flex flex-col">
+              <span class="text-sm font-medium">John Doe</span>
+              <span class="text-xs text-muted-foreground">john@example.com</span>
+            </div>
+          </div>
           <div class="h-px bg-muted my-1"></div>
-          <button class="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left">
+          <button 
+            @click="handleProfile"
+            class="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
+          >
             <User class="h-4 w-4" />
             Profile
           </button>
-          <button class="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left">
+          <button 
+            @click="handleSettings"
+            class="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
+          >
             <Settings class="h-4 w-4" />
             Settings
           </button>
           <div class="h-px bg-muted my-1"></div>
-          <button class="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left">
+          <button 
+            @click="handleLogout"
+            class="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left text-red-500 hover:text-red-500"
+          >
             <LogOut class="h-4 w-4" />
             Log out
           </button>
@@ -77,7 +103,7 @@
         <!-- Notifications Dropdown -->
         <div 
           v-if="isNotificationsOpen" 
-          class="absolute right-2 top-[3.5rem] w-[380px] rounded-lg border bg-popover p-4 text-popover-foreground shadow-md"
+          class="notifications-dropdown absolute right-2 top-[3.5rem] w-[380px] rounded-lg border bg-popover p-4 text-popover-foreground shadow-md z-50"
         >
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold">Notifications</h3>
@@ -103,7 +129,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { 
   Menu, 
   Bell, 
@@ -117,20 +143,78 @@ import {
   ShoppingCart
 } from 'lucide-vue-next'
 
+// Define emits
+const emit = defineEmits(['toggle-sidebar'])
+const router = useRouter()
+
+// Function to toggle sidebar
+const toggleSidebar = () => {
+  emit('toggle-sidebar')
+}
+
 const route = useRoute()
-const theme = ref('light')
+const theme = ref(localStorage.getItem('theme') || 'light')
+
+// Initialize theme
+const initializeTheme = () => {
+  // Check if theme is in localStorage
+  const savedTheme = localStorage.getItem('theme')
+  if (savedTheme) {
+    theme.value = savedTheme
+  } else {
+    // Check system preference
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    theme.value = systemTheme
+  }
+  applyTheme(theme.value)
+}
+
+// Apply theme to document
+const applyTheme = (newTheme) => {
+  if (newTheme === 'dark') {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+  localStorage.setItem('theme', newTheme)
+}
+
+const toggleTheme = () => {
+  const newTheme = theme.value === 'light' ? 'dark' : 'light'
+  theme.value = newTheme
+  applyTheme(newTheme)
+}
+
 const isNotificationsOpen = ref(false)
 const isUserMenuOpen = ref(false)
 const searchQuery = ref('')
+
+// Mock user data - replace with real user data from your auth system
+const user = {
+  name: 'John Doe',
+  email: 'john@example.com',
+  avatar: 'https://avatars.githubusercontent.com/u/1?v=4'
+}
 
 const handleSearch = () => {
   // Implement search functionality here
   console.log('Searching for:', searchQuery.value)
 }
 
-const toggleTheme = () => {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
-  // Here you would implement actual theme switching logic
+const handleProfile = () => {
+  router.push('/profile')
+  isUserMenuOpen.value = false
+}
+
+const handleSettings = () => {
+  router.push('/settings')
+  isUserMenuOpen.value = false
+}
+
+const handleLogout = () => {
+  // Implement your logout logic here
+  console.log('Logging out...')
+  isUserMenuOpen.value = false
 }
 
 // Mock notifications data
@@ -157,15 +241,21 @@ const notifications = [
 
 // Close dropdowns when clicking outside
 const handleClickOutside = (event) => {
-  if (isNotificationsOpen.value && !event.target.closest('.notifications-dropdown')) {
+  const target = event.target
+  if (isNotificationsOpen.value && 
+      !target.closest('.notifications-dropdown') && 
+      !target.closest('[aria-label="Toggle notifications"]')) {
     isNotificationsOpen.value = false
   }
-  if (isUserMenuOpen.value && !event.target.closest('.user-menu-dropdown')) {
+  if (isUserMenuOpen.value && 
+      !target.closest('.user-menu-dropdown') && 
+      !target.closest('[aria-label="User menu"]')) {
     isUserMenuOpen.value = false
   }
 }
 
 onMounted(() => {
+  initializeTheme()
   document.addEventListener('click', handleClickOutside)
 })
 
