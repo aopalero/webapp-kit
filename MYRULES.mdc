@@ -1,0 +1,51 @@
+---
+description: Full-stack web application with Laravel backend and Vue.js frontend
+globs: 
+alwaysApply: false
+---
+---
+description: Full-stack web application with Laravel backend and Vue.js frontend
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# WebApp-Kit: Full-Stack Web Application
+
+## Project Overview
+This is a modern full-stack web application built with Laravel (PHP) on the backend and Vue.js on the frontend. The application follows a decoupled architecture with separate backend and frontend directories.
+
+## Technology Stack
+
+### Backend
+- **Framework**: Laravel 12
+- **Language**: PHP 8.2+
+- **Database**: MySQL (configured in .env)
+- **API**: RESTful API endpoints
+- **Authentication**: Laravel built-in authentication Sanctum
+- **Package Manager**: Composer
+
+### Frontend
+- **Framework**: Vue.js 3
+- **Build Tool**: Vite
+- **CSS Framework**: Tailwind CSS with custom configuration
+- **Font Family**: Inter as primary font, with system fallbacks
+- **State Management**: Pinia
+- **Routing**: Vue Router
+- **Component**: Shadcn
+- **Package Manager**: npm
+
+## Project Structure
+- `/backend`: Laravel application (API, business logic, database)
+- `/frontend`: Vue.js application (UI, state management, routing)
+- Each directory has its own package management and configuration
+
+## Development Workflow
+- Backend development: Laravel artisan commands for migrations, seeding, etc.
+- Frontend development: npm scripts for building and serving the Vue application
+- Full-stack development: Concurrently run both backend and frontend servers
+
+## Coding Standards
+- PHP: PSR-12 coding standard (enforced by Laravel Pint)
+- JavaScript: ESLint with Vue plugin
+- CSS: Tailwind CSS with custom theming
+- **Typography**: Inter font family for consistent typography across the application 
