@@ -128,8 +128,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { 
   Menu, 
   Bell, 
@@ -146,13 +147,14 @@ import {
 // Define emits
 const emit = defineEmits(['toggle-sidebar'])
 const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
 
 // Function to toggle sidebar
 const toggleSidebar = () => {
   emit('toggle-sidebar')
 }
 
-const route = useRoute()
 const theme = ref(localStorage.getItem('theme') || 'light')
 
 // Initialize theme
@@ -189,12 +191,8 @@ const isNotificationsOpen = ref(false)
 const isUserMenuOpen = ref(false)
 const searchQuery = ref('')
 
-// Mock user data - replace with real user data from your auth system
-const user = {
-  name: 'John Doe',
-  email: 'john@example.com',
-  avatar: 'https://avatars.githubusercontent.com/u/1?v=4'
-}
+// Get user from auth store
+const user = computed(() => authStore.getUser)
 
 const handleSearch = () => {
   // Implement search functionality here
@@ -211,9 +209,9 @@ const handleSettings = () => {
   isUserMenuOpen.value = false
 }
 
-const handleLogout = () => {
-  // Implement your logout logic here
-  console.log('Logging out...')
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/login')
   isUserMenuOpen.value = false
 }
 

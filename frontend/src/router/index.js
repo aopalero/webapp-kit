@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { authService } from '@/services/auth'
 import AdminLayout from '../components/layout/AdminLayout.vue'
 
 // Dashboards
@@ -28,30 +29,31 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
-      meta: { layout: 'auth' }
+      meta: { layout: 'auth', guest: true }
     },
     {
       path: '/forgot-password',
       name: 'forgot-password',
       component: ForgotPasswordView,
-      meta: { layout: 'auth' }
+      meta: { layout: 'auth', guest: true }
     },
     {
       path: '/reset-password/:token',
       name: 'reset-password',
       component: ResetPasswordView,
-      meta: { layout: 'auth' }
+      meta: { layout: 'auth', guest: true }
     },
     {
       path: '/admin',
       component: AdminLayout,
+      meta: { requiresAuth: true },
       children: [
         // Dashboards
         {
           path: '',
           name: 'dashboard',
           component: DashboardView,
-          meta: { title: 'Dashboard' }
+          meta: { title: 'Dashboard', requiresAuth: true }
         },
         
         // Apps
@@ -59,7 +61,7 @@ const router = createRouter({
           path: 'users',
           name: 'users',
           component: UsersView,
-          meta: { title: 'Users' }
+          meta: { title: 'Users', requiresAuth: true }
         }
       ]
     },
@@ -92,10 +94,34 @@ const router = createRouter({
   ]
 })
 
-// Navigation guard to set document title
+// Navigation guards
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} - WebApp Kit` : 'WebApp Kit'
-  next()
+  const isAuthenticated = authService.isAuthenticated()
+
+  // Check if route requires authentication
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!isAuthenticated) {
+      next({
+        path: '/login',
+        query: { redirect: to.fullPath }
+      })
+    } else {
+      next()
+    }
+  }
+  
+  // Check if route is for guests only (like login page)
+  else if (to.matched.some(record => record.meta.guest)) {
+    if (isAuthenticated) {
+      next('/admin')
+    } else {
+      next()
+    }
+  }
+  
+  else {
+    next()
+  }
 })
 
 export default router
