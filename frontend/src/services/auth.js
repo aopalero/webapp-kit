@@ -19,39 +19,39 @@ axios.interceptors.request.use(
 );
 
 export const authService = {
+    setAuthHeader(token) {
+        if (token) {
+            const authHeader = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+            axios.defaults.headers.common['Authorization'] = authHeader;
+        } else {
+            delete axios.defaults.headers.common['Authorization'];
+        }
+    },
+
     async login(credentials) {
         const response = await axios.post(`${API_URL}/auth/login`, credentials);
         if (response.data.token) {
-            // Ensure token is stored without 'Bearer ' prefix
             const token = response.data.token.replace('Bearer ', '');
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
-            console.log('Token stored:', token); // Debug token storage
-        }
-        return response.data;
-    },
-
-    async register(userData) {
-        const response = await axios.post(`${API_URL}/auth/register`, userData);
-        if (response.data.token) {
-            // Ensure token is stored without 'Bearer ' prefix
-            const token = response.data.token.replace('Bearer ', '');
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            console.log('Token stored:', token); // Debug token storage
+            this.setAuthHeader(token);
         }
         return response.data;
     },
 
     async logout() {
         try {
-            console.log('Token before logout:', localStorage.getItem('token')); // Debug token before logout
             const response = await axios.post(`${API_URL}/auth/logout`);
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            this.setAuthHeader(null);
             return response.data;
         } catch (error) {
-            console.error('Logout error:', error.response?.data || error); // Better error logging
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                this.setAuthHeader(null);
+            }
             throw error;
         }
     },
@@ -73,4 +73,4 @@ export const authService = {
     isAuthenticated() {
         return !!this.getToken();
     }
-}; 
+};

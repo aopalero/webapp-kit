@@ -131,6 +131,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import { 
   Menu, 
   Bell, 
@@ -149,42 +150,17 @@ const emit = defineEmits(['toggle-sidebar'])
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 
 // Function to toggle sidebar
 const toggleSidebar = () => {
   emit('toggle-sidebar')
 }
 
-const theme = ref(localStorage.getItem('theme') || 'light')
-
-// Initialize theme
-const initializeTheme = () => {
-  // Check if theme is in localStorage
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme) {
-    theme.value = savedTheme
-  } else {
-    // Check system preference
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    theme.value = systemTheme
-  }
-  applyTheme(theme.value)
-}
-
-// Apply theme to document
-const applyTheme = (newTheme) => {
-  if (newTheme === 'dark') {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-  localStorage.setItem('theme', newTheme)
-}
+const theme = computed(() => themeStore.theme)
 
 const toggleTheme = () => {
-  const newTheme = theme.value === 'light' ? 'dark' : 'light'
-  theme.value = newTheme
-  applyTheme(newTheme)
+  themeStore.toggleTheme()
 }
 
 const isNotificationsOpen = ref(false)
@@ -253,7 +229,6 @@ const handleClickOutside = (event) => {
 }
 
 onMounted(() => {
-  initializeTheme()
   document.addEventListener('click', handleClickOutside)
 })
 

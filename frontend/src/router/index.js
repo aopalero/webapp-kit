@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { authService } from '@/services/auth'
+import { useAuthStore } from '@/stores/auth'
 import AdminLayout from '../components/layout/AdminLayout.vue'
 
 // Dashboards
@@ -95,33 +95,27 @@ const router = createRouter({
 })
 
 // Navigation guards
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = authService.isAuthenticated()
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuthStore()
 
   // Check if route requires authentication
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!isAuthenticated) {
-      next({
-        path: '/login',
-        query: { redirect: to.fullPath }
-      })
-    } else {
-      next()
+    if (!auth.isAuthenticated) {
+      // Store the intended path in localStorage
+      localStorage.setItem('intended_redirect', to.fullPath)
+      auth.requireAuth()
+      return router.replace({ name: 'login' })
     }
   }
   
   // Check if route is for guests only (like login page)
-  else if (to.matched.some(record => record.meta.guest)) {
-    if (isAuthenticated) {
-      next('/admin')
-    } else {
-      next()
+  if (to.matched.some(record => record.meta.guest)) {
+    if (auth.isAuthenticated) {
+      return router.replace({ name: 'dashboard' })
     }
   }
   
-  else {
-    next()
-  }
+  next()
 })
 
 export default router

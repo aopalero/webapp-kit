@@ -66,6 +66,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { toast } from '@/lib/toast'
 
 const router = useRouter()
 const route = useRoute()
@@ -80,7 +81,7 @@ onMounted(() => {
   
   // Validate token (this would typically be done on the server)
   if (!token.value) {
-    alert('Invalid or expired password reset token')
+    toast.error('Invalid or expired password reset token')
     router.push('/login')
   }
 })
@@ -89,12 +90,12 @@ const handleResetPassword = async () => {
   try {
     // Basic validation
     if (password.value !== confirmPassword.value) {
-      alert('Passwords do not match')
+      toast.error('Passwords do not match')
       return
     }
     
     if (password.value.length < 8) {
-      alert('Password must be at least 8 characters long')
+      toast.error('Password must be at least 8 characters long')
       return
     }
     
@@ -107,12 +108,13 @@ const handleResetPassword = async () => {
     console.log('Password reset with token:', token.value, 'and new password:', password.value)
     
     // Show success message
-    alert('Your password has been reset successfully')
+    toast.success('Your password has been reset successfully')
     
     // Redirect to login
     router.push('/login')
   } catch (error) {
     console.error('Password reset failed:', error)
+    toast.error('Failed to reset password. Please try again.')
   } finally {
     isLoading.value = false
   }

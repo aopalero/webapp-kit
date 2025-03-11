@@ -26,11 +26,6 @@
         </div>
         
         <form @submit.prevent="handleLogin" class="grid gap-4">
-          <!-- Show error message if exists -->
-          <div v-if="authStore.error" class="rounded-md bg-red-50 p-4 text-sm text-red-500 dark:bg-red-900/50 dark:text-red-400">
-            {{ authStore.error }}
-          </div>
-          
           <div class="grid gap-2">
             <label for="email" class="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
             <input
@@ -82,13 +77,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
+import { toast } from '@/lib/toast'
 
 const router = useRouter()
-const route = useRoute()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 
 const email = ref('')
 const password = ref('')
@@ -100,23 +97,23 @@ const handleLogin = async () => {
     isLoading.value = true
     const success = await authStore.login({
       email: email.value,
-      password: password.value
+      password: password.value,
+      remember: rememberMe.value
     })
     
     if (success) {
-      // Use the redirect parameter if it exists, otherwise go to /admin
-      const redirectPath = route.query.redirect || '/admin'
-      router.push(redirectPath)
+      const intendedPath = localStorage.getItem('intended_redirect')
+      if (intendedPath) {
+        localStorage.removeItem('intended_redirect')
+        router.push(intendedPath)
+      } else {
+        router.push('/')
+      }
     }
-  } catch (error) {
-    console.error('Login failed:', error)
+  } catch (err) {
+    console.error('Login error:', err)
   } finally {
     isLoading.value = false
   }
 }
-
-// Clear any existing errors when component mounts
-onMounted(() => {
-  authStore.error = null
-})
 </script> 

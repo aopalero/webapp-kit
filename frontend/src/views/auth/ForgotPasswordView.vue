@@ -45,6 +45,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from '@/lib/toast'
 
 const router = useRouter()
 const email = ref('')
@@ -63,7 +64,7 @@ const handleForgotPassword = async () => {
     
     // Show success message
     resetSent.value = true
-    alert('Password reset link has been sent to your email')
+    toast.success('Password reset link has been sent to your email')
     
     // Redirect to login after a delay
     setTimeout(() => {
@@ -71,6 +72,7 @@ const handleForgotPassword = async () => {
     }, 2000)
   } catch (error) {
     console.error('Password reset request failed:', error)
+    toast.error('Failed to send reset link. Please try again.')
   } finally {
     isLoading.value = false
   }
