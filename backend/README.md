@@ -69,7 +69,7 @@ This is the backend API for the web application built with Laravel.
 
 The API uses Laravel Sanctum for authentication. To authenticate:
 
-1. Register a user or login to get an API token
+1. Login with your credentials to get an API token
 2. Include the token in the Authorization header:
    ```
    Authorization: Bearer {your_api_token}
@@ -77,7 +77,6 @@ The API uses Laravel Sanctum for authentication. To authenticate:
 
 ### Available Endpoints
 
-- `POST /api/auth/register` - Register a new user
 - `POST /api/auth/login` - Login and get token
 - `POST /api/auth/logout` - Logout (invalidate token)
 - `GET /api/user` - Get authenticated user info

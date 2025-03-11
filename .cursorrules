@@ -1,14 +1,3 @@
----
-description: Full-stack web application with Laravel backend and Vue.js frontend
-globs: 
-alwaysApply: false
----
----
-description: Full-stack web application with Laravel backend and Vue.js frontend
-globs: ["**/*"]
-alwaysApply: true
----
-
 # WebApp-Kit: Full-Stack Web Application
 
 ## Project Overview
@@ -30,6 +19,7 @@ This is a modern full-stack web application built with Laravel (PHP) on the back
 - **CSS Framework**: Tailwind CSS with custom configuration
 - **Font Family**: Inter as primary font, with system fallbacks
 - **State Management**: Pinia
+- **HTTP Requests**: Axios
 - **Routing**: Vue Router
 - **Component**: Shadcn
 - **Package Manager**: npm
